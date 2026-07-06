@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3>Signup</h3>
+            </div>
+
+            <div class="card-body">
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label>Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Register As</label>
+                        <select name="role" class="form-control" required>
+                            <option value="Customer">Customer</option>
+                            <option value="Seller">Seller</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Register
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+

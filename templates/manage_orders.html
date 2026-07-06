@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">Manage Orders</h2>
+
+<div class="card shadow">
+    <div class="card-body">
+
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Total Price</th>
+                    <th>Payment Mode</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for order in page_obj %}
+                <tr>
+                    <td>{{ order.user.username }}</td>
+                    <td>{{ order.product.name }}</td>
+                    <td>₹{{ order.total_price }}</td>
+                    <td>{{ order.payment_method }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.created_at }}</td>
+                    <td>
+                        {% if order.status == "Pending" %}
+                            <a href="{% url 'update_order_status' order.id 'Accepted' %}" class="btn btn-success btn-sm">Accept</a>
+                            <a href="{% url 'update_order_status' order.id 'Cancelled' %}" class="btn btn-danger btn-sm">Cancel</a>
+                        {% elif order.status == "Accepted" %}
+                            <a href="{% url 'update_order_status' order.id 'Delivered' %}" class="btn btn-primary btn-sm">Delivered</a>
+                            <a href="{% url 'update_order_status' order.id 'Cancelled' %}" class="btn btn-danger btn-sm">Cancel</a>
+                        {% elif order.status == "Delivered" %}
+                            <span class="badge bg-success">Delivered</span>
+                        {% elif order.status == "Cancelled" %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No Orders Found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
+    

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">All Products</h2>
+
+<div class="row">
+    
+    {% for product in products %}
+
+    <div class="col-md-3 mb-4">
+
+        <div class="card shadow h-100">
+
+            <a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: black;">
+                
+                {% if product.image %}
+                <img src="{{ product.image.url }}"
+                     class="card-img-top"
+                     height="220"
+                     style="object-fit: cover;">
+            {% else %}
+
+               <div class="text-centre p-5 bg-light">
+                   <h1>🛒</h1>
+               </div>
+               {% endif %}
+
+
+            </a>
+
+            <div class="card-body">
+
+                <a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: black;">
+                    <h5 class="fw-bold">
+                        {{ product.name }}
+                    </h5>
+                </a>
+
+                <p class="text-success fw-bold">
+                    ₹{{ product.price }}
+                </p>
+
+                <p>
+                    {{ product.description }}
+                </p>
+
+                <p>
+                    <strong>Seller:</strong>
+                    {{ product.seller.username }}
+
+                </p>
+
+                <div class="d-grid gap-2">
+
+                    <a href="{% url 'add_to_cart' product.id %}"
+                       class="btn btn-primary">
+
+                       Add To cart
+
+                </a>
+
+                <a href="{% url 'checkout' product.id %}"
+                   class="btn btn-success">
+
+                   Buy Now
+
+            </a>
+
+        </div>
+
+    </div>
+    
+</div>
+
+</div>
+
+{% empty %}
+
+<div class="col-12">
+
+    <div class="alert alert-warning text-center">
+
+        No Products Available
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

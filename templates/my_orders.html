@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>My Orders</h2>
+
+<table class="table table-boarded table-striped mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Product</th>
+            <th>Total Price</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.product.name }}</td>
+            <td>₹{{ order.total_price }}</td>
+            <td>{{ order.payment_method }}</td>
+            <td>{{ order.status }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">No orders yet</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+    

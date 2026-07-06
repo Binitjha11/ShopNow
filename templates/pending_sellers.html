@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Pending Sellers</h2>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Approved</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for seller in sellers %}
+        <tr>
+            <td>{{ seller.user.username }}</td>
+            <td>{{ seller.user.email }}</td>
+            <td>{{ seller.role }}</td>
+            <td>{{ seller.is_approved }}</td>
+            <td>
+                <a href="{% url 'approve_seller' seller.id %}" class="btn btn-success btn-sm">
+                    Approve
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">No pending sellers</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="/admin-dashboard/" class="btn btn-secondary">Back</a>
+
+{% endblock %}

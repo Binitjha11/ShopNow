@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="card shadow p-4">
+
+    <h2>Checkout</h2>
+
+    <h4>{{ product.name }}</h4>
+    <p>Price: ₹{{ product.price }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Quantity</label>
+        <input type="number" name="quantity" value="1" min="1" class="form-control" required>
+
+        <br>
+
+        <label>Payment Method</label>
+        <select name="payment_method" class="form-control" required>
+            <option value="COD">Cash On Delivery</option>
+            <option value="ONLINE">Online Payment</option>
+        </select>
+
+        <br>
+
+        <button type="submit" class="btn btn-success">
+            Place Order
+        </button>
+
+        <a href="/products/" class="btn btn-secondary">
+            Back
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}

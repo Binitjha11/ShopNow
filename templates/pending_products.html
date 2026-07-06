@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Pending Products</h2>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Product</th>
+            <th>Seller</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.seller.username }}</td>
+            <td>₹{{ product.price }}</td>
+            <td>{{ product.status }}</td>
+            <td>
+                <a href="{% url 'approve_product' product.id %}" class="btn btn-success btn-sm">
+                    Approve
+                </a>
+
+                <a href="{% url 'reject_product' product.id %}" class="btn btn-danger btn-sm">
+                    Reject
+                </a>
+            </td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="5" class="text-center">
+                No pending products
+            </td>
+        </tr>
+
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="/admin-dashboard/" class="btn btn-secondary">
+    Back to Dashboard
+</a>
+
+{% endblock %}
+        
+
+    

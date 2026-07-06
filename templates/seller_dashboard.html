@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4">Seller Dashboard</h2>
+
+<div class="row">
+
+    <div class="col-md-6">
+        <div class="card shadow p-4 text-center">
+            <h1>➕</h1>
+            <h4>Add Product</h4>
+            <p>Create a new product and send it for admin approval.</p>
+            <a href="/add-product/" class="btn btn-primary">
+                Add Product
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow p-4 text-center">
+            <h1>📋</h1>
+            <h4>My Products</h4>
+            <p>View, update, delete, and check product approval status.</p>
+            <a href="/my-products/" class="btn btn-success">
+                My Products
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
