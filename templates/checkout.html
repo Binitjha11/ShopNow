@@ -2,38 +2,425 @@
 
 {% block content %}
 
-<div class="card shadow p-4">
+<div class="container py-5">
 
-    <h2>Checkout</h2>
+    <div class="row g-4">
 
-    <h4>{{ product.name }}</h4>
-    <p>Price: ₹{{ product.price }}</p>
+        <!-- Shipping Details Section -->
+        <div class="col-lg-7">
 
-    <form method="POST">
-        {% csrf_token %}
+            <div class="card shadow-sm border-0">
 
-        <label>Quantity</label>
-        <input type="number" name="quantity" value="1" min="1" class="form-control" required>
+                <div class="card-body p-4">
 
-        <br>
+                    <h2 class="mb-4">
+                        Shipping Details
+                    </h2>
 
-        <label>Payment Method</label>
-        <select name="payment_method" class="form-control" required>
-            <option value="COD">Cash On Delivery</option>
-            <option value="ONLINE">Online Payment</option>
-        </select>
+                    {% if messages %}
 
-        <br>
+                        {% for message in messages %}
 
-        <button type="submit" class="btn btn-success">
-            Place Order
-        </button>
+                            <div class="alert alert-danger">
+                                {{ message }}
+                            </div>
 
-        <a href="/products/" class="btn btn-secondary">
-            Back
-        </a>
-    </form>
+                        {% endfor %}
+
+                    {% endif %}
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Full Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="full_name"
+                                    class="form-control"
+                                    placeholder="Enter your full name"
+                                    value="{{ request.POST.full_name }}"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Phone Number
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    class="form-control"
+                                    placeholder="Enter your phone number"
+                                    value="{{ request.POST.phone }}"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                class="form-control"
+                                placeholder="Enter your email address"
+                                value="{{ request.POST.email|default:request.user.email }}"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    House / Flat Number
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="house_number"
+                                    class="form-control"
+                                    placeholder="Flat 302, Tower B"
+                                    value="{{ request.POST.house_number }}"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Street / Area
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="street"
+                                    class="form-control"
+                                    placeholder="Sector, Street or Area"
+                                    value="{{ request.POST.street }}"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Landmark
+                            </label>
+
+                            <input
+                                type="text"
+                                name="landmark"
+                                class="form-control"
+                                placeholder="Near metro station"
+                                value="{{ request.POST.landmark }}"
+                            >
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    City
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="city"
+                                    class="form-control"
+                                    placeholder="Enter city"
+                                    value="{{ request.POST.city }}"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    State
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="state"
+                                    class="form-control"
+                                    placeholder="Enter state"
+                                    value="{{ request.POST.state }}"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Pincode
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="pincode"
+                                    class="form-control"
+                                    placeholder="Enter pincode"
+                                    value="{{ request.POST.pincode }}"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Country
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="country"
+                                    class="form-control"
+                                    value="{{ request.POST.country|default:'India' }}"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Quantity
+                            </label>
+
+                            <input
+                                type="number"
+                                name="quantity"
+                                id="quantity"
+                                class="form-control"
+                                value="{{ request.POST.quantity|default:'1' }}"
+                                min="1"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Payment Method
+                            </label>
+
+                            <select
+                                name="payment_method"
+                                class="form-select"
+                                required
+                            >
+
+                                <option value="COD">
+                                    Cash On Delivery
+                                </option>
+
+                                <option value="ONLINE">
+                                    Online Payment
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-success btn-lg w-100"
+                        >
+                            Place Order
+                        </button>
+
+                        <a
+                            href="{% url 'products' %}"
+                            class="btn btn-outline-secondary w-100 mt-3"
+                        >
+                            Back to Products
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Order Summary Section -->
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <h3 class="mb-4">
+                        Order Summary
+                    </h3>
+
+                    {% if product.image %}
+
+                        <img
+                            src="{{ product.image.url }}"
+                            alt="{{ product.name }}"
+                            class="img-fluid rounded mb-3"
+                            style="width: 100%; height: 250px; object-fit: cover;"
+                        >
+
+                    {% endif %}
+
+                    <h4>
+                        {{ product.name }}
+                    </h4>
+
+                    <p class="text-muted">
+                        {{ product.description|truncatewords:25 }}
+                    </p>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+
+                        <span>
+                            Product Price
+                        </span>
+
+                        <strong>
+                            ₹{{ product.price }}
+                        </strong>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+
+                        <span>
+                            Quantity
+                        </span>
+
+                        <strong id="summaryQuantity">
+                            1
+                        </strong>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+
+                        <span>
+                            Shipping Charge
+                        </span>
+
+                        <strong class="text-success">
+                            Free
+                        </strong>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+
+                        <h5>
+                            Total Amount
+                        </h5>
+
+                        <h5 id="totalAmount">
+                            ₹{{ product.price }}
+                        </h5>
+
+                    </div>
+
+                    <div class="alert alert-info mt-4 mb-0">
+
+                        Your order will be delivered to the shipping address entered in this form.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
+
+
+<script>
+
+    const quantityInput = document.getElementById("quantity");
+
+    const summaryQuantity = document.getElementById("summaryQuantity");
+
+    const totalAmount = document.getElementById("totalAmount");
+
+    const productPrice = Number("{{ product.price }}");
+
+
+    function updateOrderSummary() {
+
+        let quantity = Number(quantityInput.value);
+
+        if (quantity < 1 || isNaN(quantity)) {
+
+            quantity = 1;
+
+            quantityInput.value = 1;
+
+        }
+
+        const total = productPrice * quantity;
+
+        summaryQuantity.textContent = quantity;
+
+        totalAmount.textContent = "₹" + total;
+
+    }
+
+
+    quantityInput.addEventListener(
+        "input",
+        updateOrderSummary
+    );
+
+
+    updateOrderSummary();
+
+</script>
 
 {% endblock %}

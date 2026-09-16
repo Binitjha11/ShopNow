@@ -1,144 +1,403 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ProductForm
-from .models import Product
-from accounts.models import Profile
+from .models import Category, Product
 
 
-def get_profile(user):
-    profile, created = Profile.objects.get_or_create(user=user)
-    return profile
+def user_is_seller(user):
+
+    if not user.is_authenticated:
+        return False
+
+    if user.is_superuser:
+        return True
+
+    try:
+        return (
+            user.profile.role.lower() == "seller"
+            and user.profile.is_approved
+        )
+
+    except AttributeError:
+        return False
+
+
+def products_page(request):
+
+    products = Product.objects.filter(
+        status="Approved"
+    ).select_related(
+        "category",
+        "subcategory",
+        "seller"
+    )
+
+    categories = Category.objects.all()
+
+    search_query = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    category_id = request.GET.get(
+        "category",
+        ""
+    ).strip()
+
+    if search_query:
+
+        products = products.filter(
+
+            Q(name__icontains=search_query)
+
+            | Q(description__icontains=search_query)
+
+            | Q(category__name__icontains=search_query)
+
+            | Q(subcategory__name__icontains=search_query)
+        )
+
+    if category_id:
+
+        try:
+            products = products.filter(
+                category_id=int(category_id)
+            )
+
+        except ValueError:
+            category_id = ""
+
+    products = products.order_by(
+        "-id"
+    )
+
+    paginator = Paginator(
+        products,
+        12
+    )
+
+    page_number = request.GET.get(
+        "page"
+    )
+
+    page_obj = paginator.get_page(
+        page_number
+    )
+
+    context = {
+        "page_obj": page_obj,
+        "products": page_obj,
+        "categories": categories,
+        "search_query": search_query,
+        "selected_category": category_id,
+    }
+
+    return render(
+        request,
+        "products.html",
+        context
+    )
+
+
+def product_detail(request, product_id):
+
+    product = get_object_or_404(
+        Product.objects.select_related(
+            "category",
+            "subcategory",
+            "seller"
+        ),
+        id=product_id,
+        status="Approved"
+    )
+
+    related_products = Product.objects.filter(
+        category=product.category,
+        status="Approved"
+    ).exclude(
+        id=product.id
+    ).order_by(
+        "-id"
+    )[:4]
+
+    context = {
+        "product": product,
+        "related_products": related_products,
+    }
+
+    return render(
+        request,
+        "product_detail.html",
+        context
+    )
 
 
 @login_required
 def seller_dashboard(request):
-    profile = get_profile(request.user)
 
-    if profile.role != 'Seller':
-        messages.error(request, "Only sellers can access dashboard")
-        return redirect('home')
+    if not user_is_seller(
+        request.user
+    ):
 
-    if profile.is_approved == False:
-        messages.error(request, "Your seller account is not approved yet")
-        return redirect('home')
+        messages.error(
+            request,
+            "Only approved sellers can access "
+            "the seller dashboard."
+        )
 
-    return render(request, 'seller_dashboard.html')
+        return redirect(
+            "home"
+        )
 
+    products = Product.objects.filter(
+        seller=request.user
+    ).select_related(
+        "category",
+        "subcategory"
+    ).order_by(
+        "-id"
+    )
 
-@login_required
-def add_product(request):
-    profile = get_profile(request.user)
+    context = {
+        "products": products,
 
-    if profile.role != 'Seller':
-        messages.error(request, "Only sellers can add products")
-        return redirect('home')
+        "total_products": products.count(),
 
-    if profile.is_approved == False:
-        messages.error(request, "Your seller account is not approved yet")
-        return redirect('home')
+        "approved_products": products.filter(
+            status="Approved"
+        ).count(),
 
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES)
+        "pending_products": products.filter(
+            status="Pending"
+        ).count(),
 
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.seller = request.user
-            product.status = 'Pending'
-            product.save()
+        "rejected_products": products.filter(
+            status="Rejected"
+        ).count(),
+    }
 
-            messages.success(request, "Product submitted for admin approval")
-            return redirect('seller_dashboard')
-    else:
-        form = ProductForm()
-
-    return render(request, 'add_product.html', {'form': form})
+    return render(
+        request,
+        "seller_dashboard.html",
+        context
+    )
 
 
 @login_required
 def my_products(request):
-    profile = get_profile(request.user)
 
-    if profile.role != 'Seller':
-        messages.error(request, "Only sellers can view products")
-        return redirect('home')
+    if not user_is_seller(
+        request.user
+    ):
 
-    if profile.is_approved == False:
-        messages.error(request, "Your seller account is not approved yet")
-        return redirect('home')
+        messages.error(
+            request,
+            "Only approved sellers can view products."
+        )
 
-    products = Product.objects.filter(seller=request.user)
-    return render(request, 'my_products.html', {'products': products})
+        return redirect(
+            "home"
+        )
+
+    products = Product.objects.filter(
+        seller=request.user
+    ).select_related(
+        "category",
+        "subcategory"
+    ).order_by(
+        "-id"
+    )
+
+    return render(
+        request,
+        "my_products.html",
+        {
+            "products": products
+        }
+    )
 
 
 @login_required
-def update_product(request, product_id):
-    profile = get_profile(request.user)
+def add_product(request):
 
-    if profile.role != 'Seller':
-        messages.error(request, "Only sellers can update products")
-        return redirect('home')
+    if not user_is_seller(
+        request.user
+    ):
 
-    if profile.is_approved == False:
-        messages.error(request, "Your seller account is not approved yet")
-        return redirect('home')
+        messages.error(
+            request,
+            "Only approved sellers can add products."
+        )
 
-    product = get_object_or_404(Product, id=product_id, seller=request.user)
+        return redirect(
+            "home"
+        )
 
     if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES, instance=product)
+
+        form = ProductForm(
+            request.POST,
+            request.FILES
+        )
 
         if form.is_valid():
-            updated_product = form.save(commit=False)
-            updated_product.status = 'Pending'
+
+            product = form.save(
+                commit=False
+            )
+
+            product.seller = request.user
+
+            product.status = "Pending"
+
+            product.save()
+
+            messages.success(
+                request,
+                "Product added successfully. "
+                "It is waiting for admin approval."
+            )
+
+            return redirect(
+                "seller_dashboard"
+            )
+
+        messages.error(
+            request,
+            "Please correct the errors shown below."
+        )
+
+    else:
+
+        form = ProductForm()
+
+    return render(
+        request,
+        "add_product.html",
+        {
+            "form": form
+        }
+    )
+
+
+@login_required
+def edit_product(request, product_id):
+
+    if not user_is_seller(
+        request.user
+    ):
+
+        messages.error(
+            request,
+            "Only approved sellers can edit products."
+        )
+
+        return redirect(
+            "home"
+        )
+
+    product = get_object_or_404(
+        Product,
+        id=product_id,
+        seller=request.user
+    )
+
+    if request.method == "POST":
+
+        form = ProductForm(
+            request.POST,
+            request.FILES,
+            instance=product
+        )
+
+        if form.is_valid():
+
+            updated_product = form.save(
+                commit=False
+            )
+
+            updated_product.seller = request.user
+
+            updated_product.status = "Pending"
+
             updated_product.save()
 
-            messages.success(request, "Product updated and sent for admin approval")
-            return redirect('my_products')
-    else:
-        form = ProductForm(instance=product)
+            messages.success(
+                request,
+                "Product updated successfully. "
+                "It has been sent again for approval."
+            )
 
-    return render(request, 'update_product.html', {'form': form})
+            return redirect(
+                "seller_dashboard"
+            )
+
+        messages.error(
+            request,
+            "Please correct the errors shown below."
+        )
+
+    else:
+
+        form = ProductForm(
+            instance=product
+        )
+
+    return render(
+        request,
+        "update_product.html",
+        {
+            "form": form,
+            "product": product
+        }
+    )
 
 
 @login_required
 def delete_product(request, product_id):
-    profile = get_profile(request.user)
 
-    if profile.role != 'Seller':
-        messages.error(request, "Only sellers can delete products")
-        return redirect('home')
+    if not user_is_seller(
+        request.user
+    ):
 
-    if profile.is_approved == False:
-        messages.error(request, "Your seller account is not approved yet")
-        return redirect('home')
+        messages.error(
+            request,
+            "Only approved sellers can delete products."
+        )
 
-    product = get_object_or_404(Product, id=product_id, seller=request.user)
-    product.delete()
+        return redirect(
+            "home"
+        )
 
-    messages.success(request, "Product deleted successfully")
-    return redirect('my_products')
-
-def products_page(request):
-    
-    products = Product.objects.filter(status='Approved')
-    
-    return render(
-        request,
-        'products.html',
-        {'products': products}
-    )
-    
-def product_detail(request, product_id):
-    product = Product.objects.get(id=product_id, status='Approved')
-    
-    return render(
-        request,
-        'Product_detail.html',
-        {'product': product}
+    product = get_object_or_404(
+        Product,
+        id=product_id,
+        seller=request.user
     )
 
-           
-        
-    
+    if request.method == "POST":
+
+        product_name = product.name
+
+        product.delete()
+
+        messages.success(
+            request,
+            f"{product_name} deleted successfully."
+        )
+
+        return redirect(
+            "seller_dashboard"
+        )
+
+    return render(
+        request,
+        "delete_product.html",
+        {
+            "product": product
+        }
+    )

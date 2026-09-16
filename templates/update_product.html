@@ -1,32 +1,207 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}
+Update Product | ShopNow
+{% endblock %}
 
 {% block content %}
 
-<div class="container mt-4">
+<div class="container py-5">
 
-    <div class="card p-4 shadow">
+    <div class="row justify-content-center">
 
-        <h2>Update Product</h2>
+        <div class="col-lg-8">
 
-        <form method="POST" enctype="multipart/form-data">
+            <div class="card border-0 shadow-sm rounded-4">
 
-            {% csrf_token %}
+                <div class="card-header bg-white border-0 p-4">
 
-            {{ form.as_p }}
+                    <h2 class="fw-bold mb-1">
+                        Update Product
+                    </h2>
 
-            <button type="submit" class="btn btn-primary">
-                Update Product
-            </button>
+                    <p class="text-muted mb-0">
+                        Update the details below. The product will be sent for admin approval again.
+                    </p>
 
-            <a href="/my-products/" class="btn btn-
-            secondary">
-                Back
-            </a>
+                </div>
 
-        </form>
+                <div class="card-body p-4">
+
+                    {% if product.image %}
+
+                        <div class="mb-4">
+
+                            <p class="fw-semibold mb-2">
+                                Current Product Image
+                            </p>
+
+                            <img
+                                src="{{ product.image.url }}"
+                                alt="{{ product.name }}"
+                                class="rounded-3 border"
+                                style="width: 160px; height: 160px; object-fit: contain;"
+                            >
+
+                        </div>
+
+                    {% endif %}
+
+                    <form
+                        method="POST"
+                        enctype="multipart/form-data"
+                    >
+
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+
+                        {% endif %}
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Category
+                                </label>
+
+                                {{ form.category }}
+
+                                {% for error in form.category.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Sub Category
+                                </label>
+
+                                {{ form.subcategory }}
+
+                                {% for error in form.subcategory.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <label class="form-label fw-semibold">
+                                    Product Name
+                                </label>
+
+                                {{ form.name }}
+
+                                {% for error in form.name.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Price
+                                </label>
+
+                                {{ form.price }}
+
+                                {% for error in form.price.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Change Product Image
+                                </label>
+
+                                {{ form.image }}
+
+                                {% for error in form.image.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <label class="form-label fw-semibold">
+                                    Description
+                                </label>
+
+                                {{ form.description }}
+
+                                {% for error in form.description.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4 d-flex flex-wrap gap-2">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary px-4"
+                            >
+                                Update Product
+                            </button>
+
+                            <a
+                                href="{% url 'seller_dashboard' %}"
+                                class="btn btn-outline-secondary"
+                            >
+                                Cancel
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
 </div>
 
-{% endblock %} 
+{% endblock %}
